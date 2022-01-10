@@ -1,0 +1,50 @@
+// Variable
+$text-black: #2f2f2f; // Default paragraph text color
+$text-blue: #142058; // Default text blue color
+$light-blue: #3f566b; // Light blue buttons ( ex. menu )
+$light-blue-hover: #4b5e88; // Light blue buttons on hover
+$deep-blue: #243e92; // Deep blue buttons ( overview pages )
+$deep-blue-hover: #20397f; // Depp blue buttons on hoover
+$background-grey: #eff3f6; // Default background grey
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    position: relative;
+    @media (max-width: 767px) {
+        overflow-x: hidden;
+    }
+}
+
+svg {
+    opacity: 1;
+}
+
+div {
+    display: block;
+}
+
+a {
+    transition: all 0.15s ease-in;
+    &:hover {
+        transition: all 0.15s ease-out;
+    }
+}
+
+*,
+ ::after,
+ ::before {
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 625px) {
+    .number-block {
+        width: 50%;
+        border-bottom: 1px solid rgba(200, 214, 222, 0.1);
+    }
+    .number-block .counter.number {
+        font-size: 52px;
+    }
+}

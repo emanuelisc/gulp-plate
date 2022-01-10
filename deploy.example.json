@@ -1,0 +1,19 @@
+{
+    "env": {
+        "development": {
+            "ftpConfig": {
+                "host": "",
+                "user": "",
+                "password": ""
+            }
+        },
+
+        "production": {
+            "ftpConfig": {
+                "host": "",
+                "user": "",
+                "password": ""
+            }
+        }
+    }
+}

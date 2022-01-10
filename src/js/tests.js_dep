@@ -1,0 +1,622 @@
+
+(function($) {
+
+
+// TESTING FUNCTIONS
+// ===========================================================================================================================================
+
+
+$("#clear-crm").click( function(){
+
+    start_testing_process();
+
+    $.ajax({
+        type: 'POST',
+        url: ajax_object.ajaxurl,
+        dataType:'text',
+        data: {
+            action: "clear_crm",
+        },
+        success: function(response){
+            console.log(response);
+            end_testing_process(response);
+        }
+    });
+});
+
+$("#subscription-request").click(function(){
+    var registered = true;
+    if ( $('#nonregistered').is(':checked') ) {
+        registered = false;
+    }
+
+    start_testing_process();
+    console.log("registered: " + registered);
+    testing_subscription_request(registered);
+});
+
+
+$("#one-search-request").click(function(){
+    var registered = true;
+    if ( $('#nonregistered').is(':checked') ) {
+        registered = false;
+    }
+
+    start_testing_process();
+    console.log("registered: " + registered);
+    testing_one_search_request(registered);
+});
+
+
+$("#benchmarking-request").click(function(){
+    var registered = true;
+    if ( $('#nonregistered').is(':checked') ) {
+        registered = false;
+    }
+
+    start_testing_process();
+    console.log("registered: " + registered);
+    testing_benchmarking_request(registered);
+});
+
+
+$("#research-request").click(function(){
+    var registered = true;
+    if ( $('#nonregistered').is(':checked') ) {
+        registered = false;
+    }
+
+    start_testing_process();
+    console.log("registered: " + registered);
+    testing_research_request(registered);
+});
+
+$("#trial-request").click(function(){
+    var home_page = '';
+    if ( $('#homepage-mobile').is(':checked') ) {
+        home_page = 'Homepage / mobile';
+    }
+    start_testing_process();
+    testing_trial_request(home_page);
+});
+
+
+$("#convert-webp").click(function(){
+    start_testing_process();
+    convert_webp_function();
+});
+
+function convert_webp_function(){
+
+    $.ajax({
+        url: ajax_object.ajaxurl,
+        type: "post",
+        async: "false",
+        data: {
+            action: "ajax_get_dir",
+        },
+        success: function(response) {
+            // reponse = json_decode(respinse);
+            var obj = JSON.parse(response);
+            // console.log(response);
+            //
+            // $.each(obj, function( index, value ) {
+            //     console.log(value);
+            // });
+
+            // console.log('done');
+
+            console.log('init: ' + obj.length + " files");
+            converting_loop(obj, 0);
+
+        },
+        error: function(response){
+            console.log('err: ' + response);
+        }
+    });
+}
+
+var last_batch = 0;
+var loop_count = 0
+var current_file = 0;
+
+function converting_loop(files, starting){
+
+    loop_count = loop_count + 1;
+
+    console.log('loop count: ' + loop_count + ' - ' + starting);
+
+    if (loop_count > files.length && starting < current_file){
+        console.log('exit');
+        console.log('files end');
+        return;
+    }else{
+        console.log('continue');
+    }
+
+    var i = starting;
+
+    // console.log('loop starting');
+
+    for (i = starting; i < starting + 201; i++) {
+        ajax_testing(files, i, starting);
+    }
+
+}
+
+function ajax_testing(files, i, starting){
+    if (i <= current_file){
+        return;
+    }
+    $.ajax({
+        url: ajax_object.ajaxurl,
+        type: "post",
+        data: {
+            action: "ajax_convert_images_to_webp",
+            file: files[i],
+        },
+        success: function(response) {
+            $(".results").append(response + '<br>');
+            $('.results').scrollTop($('.results')[0].scrollHeight);
+
+            // files.length
+
+            console.log(i);
+
+            if ( i == starting + 200 && i < files.length + 1 && starting + 200 != last_batch){
+                // console.log('this part ? ');
+                last_batch = starting + 200;
+                current_file =  starting + 200;
+                converting_loop(files,  starting + 200);
+
+            }else if (i == files.length){
+                console.log('the end');
+            }
+        }
+    });
+}
+
+
+function testing_trial_request(home_page){
+
+    var tax_summit     = '';
+    var user_name      = 'test name';
+    var user_email     = '';
+    var user_company   = '';
+    var user_phone     = '+37061111111';
+    var _heard_via      = [ "", "Client referral", "Event", "Conference", "Web search", "Mail", "LinkedIn", "Twitter", "Facebook", "Bing", "Other"];
+    var user_country   = "Lithuania";
+    var user_databases = 'Royalty rates, Loan interest rates, Service fees';
+
+    var heard_via = "Client referral";
+
+    var request_count = 0;
+
+        $.ajax({
+            url: ajax_object.ajaxurl,
+            type: "post",
+            data: {
+                action: "ajax_free_trial",
+                user_name: user_name,
+                user_email: user_email,
+                user_company: user_company,
+                user_phone: user_phone,
+                user_databases: user_databases,
+                tax_summit: tax_summit,
+                user_country: user_country,
+                // user_amount: amount,
+                heard_via: heard_via,
+                home_page: home_page,
+            },
+            success: function(response) {
+                console.log('success '  + response);
+                request_count = request_count + 1;
+                end_testing_process(response + '<br>' + 'Request count: ' + request_count);
+
+            },
+            error: function(response){
+                console.log('err: ' + response);
+            }
+        });
+    // });
+
+}
+
+function testing_subscription_request(registered){
+
+    var requests = {
+        royalty_rates_subscription_1: {
+            database_type     : "royalty-rates",
+            subscription_plan : "standard",
+            criteria          : {
+                Access        : 'Standard - €3,800',
+                },
+        },
+        royalty_rates_subscription_2: {
+            database_type     : "royalty-rates",
+            subscription_plan : "business",
+            criteria          : {
+                Access        : 'Business - On request',
+                },
+        },
+        royalty_rates_subscription_3: {
+            database_type     : "royalty-rates",
+            subscription_plan : "enterprise",
+            criteria          : {
+                Access        : 'Enterprise - On request',
+                },
+        },
+
+        loans_interest_rates_subscription_1: {
+            database_type     : "loan-interest-rates",
+            subscription_plan : "standard",
+            criteria          : {
+                Access        : 'Standard - €4,200',
+                },
+        },
+        loans_interest_rates_subscription_2: {
+            database_type     : "loan-interest-rates",
+            subscription_plan : "business",
+            criteria          : {
+                Access        : 'Business - On request',
+                },
+        },
+        loans_interest_rates_subscription_3: {
+            database_type     : "loan-interest-rates",
+            subscription_plan : "enterprise",
+            criteria          : {
+                Access        : 'Enterprise - On request',
+                },
+        },
+
+        serivce_fees_subscription_1: {
+            database_type     : "service-fees",
+            subscription_plan : "standard",
+            criteria          : {
+                Access        : 'Standard - €4,200',
+                },
+        },
+        serivce_fees_subscription_2: {
+            database_type     : "service-fees",
+            subscription_plan : "business",
+            criteria          : {
+                Access        : 'Business - On request',
+                },
+        },
+        serivce_fees_subscription_3: {
+            database_type     : "service-fees",
+            subscription_plan : "enterprise",
+            criteria          : {
+                Access        : 'Enterprise - On request',
+                },
+        },
+    };
+
+    var request_count = 0;
+
+    $.each(requests, function(index, value){
+       this.user_name    = 'test name';
+       this.user_phone   = '+37061111111';
+       this.user_message = "test user message";
+       this.currency     = 'EUR';
+       this.request_type = 'database-subscription';
+       this.write_up     = '';
+
+       if (registered == true){
+           this.user_email   = '';
+           this.user_id      = '1000';
+           this.user_company = '';
+       }else{
+           this.user_email   = '';
+           this.user_id      = '0';
+           this.user_company = '';
+       }
+
+       $.ajax({
+           type: 'POST',
+           url: ajax_object.ajaxurl,
+           dataType:'text',
+           data: {
+               action: "user_send_request",
+               user_message: this.user_message,
+               user_id: this.user_id,
+               user_email: this.user_email,
+               user_name: this.user_name,
+               request_type: this.request_type,
+               subscription_plan: this.subscription_plan,
+               currency: this.currency,
+               database_type: this.database_type,
+               write_up: this.write_up,
+               user_phone: this.user_phone,
+               user_company: this.user_company,
+               front_page: '',
+               mobile: '',
+               criteria: JSON.stringify(this.criteria)
+           },
+           success: function(response){
+               console.log(response);
+
+               var request_id = response;
+               var request_information = value;
+               request_count = request_count + 1;
+
+               // get requests from db
+               test_general_request_db(request_id, request_information, request_count);
+
+           }
+       });
+   });
+
+}
+
+function testing_one_search_request(registered){
+
+    var requests = {
+        royalty_rates_one_search: {
+            database_type     : "royalty-rates",
+        },
+        loan_interest_rates_one_search: {
+            database_type     : "loan-interest-rates",
+        },
+        service_fees_one_search: {
+            database_type     : "service-fees",
+        },
+    };
+
+    var criteria = {};
+    criteria["Write-up"]    = "I would like to order RoyaltyRange search strategy write-up";
+    criteria["Type"]        = "type test";
+    criteria["Key Words"]   = "key words test";
+    criteria["NACE rev. 2"] = "nace test";
+    criteria["SIC"]         = "sic test";
+    criteria["Date"]        = "date test";
+    criteria["Territory"]   = "territory test";
+    criteria["Exclusivity"] = "exclusivity test";
+
+    var request_count = 0;
+
+    $.each(requests, function(index, value){
+       this.user_name         = 'test name';
+       this.user_phone        = '+37061111111';
+       this.user_message      = "test user message";
+       this.currency          = 'USD';
+       this.request_type      = 'one-search';
+       this.subscription_plan = '';
+       this.currency          = 'eur';
+       this.write_up          = 'true';
+       this.criteria          = criteria;
+
+       if (registered == true){
+           this.user_email    = '';
+           this.user_id      = '1000';
+           this.user_company = '';
+       }else{
+           this.user_email   = '';
+           this.user_id      = '0';
+           this.user_company = '';
+       }
+
+       $.ajax({
+           type: 'POST',
+           url: ajax_object.ajaxurl,
+           dataType:'text',
+           data: {
+               action: "user_send_request",
+               user_message: this.user_message,
+               user_id: this.user_id,
+               user_email: this.user_email,
+               user_name: this.user_name,
+               request_type: this.request_type,
+               subscription_plan: this.subscription_plan,
+               currency: this.currency,
+               database_type: this.database_type,
+               write_up: this.write_up,
+               user_phone: this.user_phone,
+               user_company: this.user_company,
+               front_page: '',
+               mobile: '',
+               criteria: JSON.stringify(this.criteria)
+           },
+           success: function(response){
+               console.log(response);
+
+               var request_id = response;
+               var request_information = value;
+               request_count = request_count + 1;
+
+               // get requests from db
+               test_general_request_db(request_id, request_information, request_count);
+
+           }
+       });
+   });
+}
+
+function testing_benchmarking_request(registered){
+
+        var requests = {
+            royalty_rates_benchmarking_studies: {
+                database_type     : "royalty-rates",
+            },
+            loan_interest_rates_benchmarking_studies: {
+                database_type     : "loan-interest-rates",
+            },
+            service_fees_benchmarking_studies: {
+                database_type     : "service-fees",
+            },
+        };
+
+        var request_count = 0;
+
+        $.each(requests, function(index, value){
+            var criteria = {};
+            criteria["Type"]        = "type test";
+            criteria["Key Words"]   = "key words test";
+            criteria["NACE rev. 2"] = "nace test";
+            criteria["SIC"]         = "sic test";
+            criteria["Date"]        = "date test";
+            criteria["Territory"]   = "territory test";
+
+            this.user_name         = 'test name';
+            this.user_phone        = '+37061111111';
+            this.user_message      = "test user message";
+            this.request_type      = 'benchmarking-study';
+            this.subscription_plan = '';
+            this.currency          = 'EUR';
+            this.write_up          = '';
+
+            if (registered == true){
+                this.user_email   = '';
+                this.user_id      = '1000';
+                this.user_company = '';
+            }else{
+                this.user_email   = '';
+                this.user_id      = '0';
+                this.user_company = '';
+            }
+
+
+            // exclusivity criterion removed from loans database
+            if (this.database_type != 'loan-interest-rates'){
+                criteria["Exclusivity"] = "exclusivity test";
+            }
+
+            this.criteria          = criteria;
+
+            $.ajax({
+            type: 'POST',
+            url: ajax_object.ajaxurl,
+            dataType:'text',
+            data: {
+                action: "user_send_request",
+                user_message: this.user_message,
+                user_id: this.user_id,
+                user_email: this.user_email,
+                user_name: this.user_name,
+                request_type: this.request_type,
+                subscription_plan: this.subscription_plan,
+                currency: this.currency,
+                database_type: this.database_type,
+                write_up: this.write_up,
+                user_phone: this.user_phone,
+                user_company: this.user_company,
+                front_page: '',
+                mobile: '',
+                criteria: JSON.stringify(this.criteria)
+                },
+                success: function(response){
+                    console.log(response);
+
+                    var request_id = response;
+                    var request_information = value;
+                    request_count = request_count + 1;
+
+                    // get requests from db
+                    test_general_request_db(request_id, request_information, request_count);
+
+                }
+            });
+       });
+}
+
+function testing_research_request(registered){
+
+    var request =  {};
+    
+    var criteria = {};
+
+    request.user_name         = 'test name';
+    request.user_phone        = '+37061111111';
+    request.user_message      = "test user message";
+    request.request_type      = 'research-and-data-collection';
+    request.database_type     = 'royalty-rates';
+    request.subscription_plan = '';
+    request.currency          = 'EUR';
+    request.write_up          = '';
+    request.criteria          = criteria;
+
+    if (registered == true){
+        request.user_email   = '';
+        request.user_id      = '1000';
+        request.user_company = '';
+    }else{
+        request.user_email   = '';
+        request.user_id      = '0';
+        request.user_company = '';
+    }
+
+    $.ajax({
+    type: 'POST',
+    url: ajax_object.ajaxurl,
+    dataType:'text',
+    data: {
+        action: "user_send_request",
+        user_message: request.user_message,
+        user_id: request.user_id,
+        user_email: request.user_email,
+        user_name: request.user_name,
+        request_type: request.request_type,
+        subscription_plan: request.subscription_plan,
+        currency: request.currency,
+        database_type: request.database_type,
+        write_up: request.write_up,
+        user_phone: request.user_phone,
+        user_company: request.user_company,
+        front_page: '',
+        mobile: '',
+        criteria: ''
+        },
+        success: function(response){
+            console.log(response);
+            // end_testing_process(response);
+
+            // get requests from db
+            var request_id = response;
+            var request_information = request;
+
+            test_general_request_db(request_id, request_information);
+
+        }
+    });
+}
+
+function test_general_request_db(request_id, request_information, request_count){
+    $.ajax({
+        type: 'POST',
+        url: ajax_object.ajaxurl,
+        dataType:'text',
+        data: {
+            action: "test_general_request",
+            request_information: request_information,
+            request_id: request_id,
+        },
+        success: function(response){
+             console.log(response);
+             end_testing_process(response + '<br>' + 'Request count: ' + request_count);
+        }
+    });
+}
+
+function start_testing_process(){
+    $(".testing-buttons .button").addClass('inactive');
+    $(".results").empty();
+    $(".results").append("<h2>Results:</h2>");
+    $('.results').append("<p class='loading-note'>Loading...</p>");
+}
+
+function end_testing_process(response){
+    $(".testing-buttons .button").removeClass('inactive');
+    $(".results .loading-note").remove();
+    // $(".results").append("<h2>Results:</h2>");
+    $(".results").append(response);
+    $(".results").append("<br><br><br>");
+    $('.results').scrollTop($('.results')[0].scrollHeight);
+
+}
+
+$("#clear-results").click(function(){
+    $(".results").empty();
+    $(".results").append("<h2>Results:</h2>");
+});
+
+})( jQuery );
